@@ -42,7 +42,7 @@ namespace CHelper::Profile {
 
     void printAndClear(const std::exception &e) {
 #ifndef CHELPER_NO_FILESYSTEM
-        SPDLOG_ERROR("{}\nstack trace:\n{}", e.what(), fmt::join(stack, "\n"));
+        SPDLOG_ERROR("{}\nstack trace:\n{}", e.what(), CHELPER_FMT_JOIN(stack, "\n"));
         stack.clear();
 #endif
     }
