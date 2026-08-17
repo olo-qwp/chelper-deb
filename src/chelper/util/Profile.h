@@ -21,6 +21,19 @@
 #ifndef CHELPER_PROFILE_H
 #define CHELPER_PROFILE_H
 
+#include <fmt/base.h>
+#include <fmt/format.h>
+
+// fmt 版本兼容：fmt 10+ 的 basic_format_string::str 为私有（用 get()，vargs 已移除），
+// fmt 9 及更早使用公开的 str 与 fmt::vargs
+#if FMT_VERSION >= 100000
+#define CHELPER_FMT_STR(f) (f).get()
+#define CHELPER_FMT_ARGS(...) fmt::make_format_args(__VA_ARGS__)
+#else
+#define CHELPER_FMT_STR(f) (f).str
+#define CHELPER_FMT_ARGS(...) fmt::vargs<__VA_ARGS__>
+#endif
+
 /**
  * 跟踪代码的运行，为了在遇到bug的时候方便排查错误的位置
  */
@@ -33,7 +46,7 @@ namespace CHelper::Profile {
     template<typename... T>
     void push(const fmt::format_string<T...> fmt, T &&...args) {
 #ifndef CHELPER_NO_FILESYSTEM
-        stack.push_back(fmt::vformat(fmt.get(), fmt::make_format_args(args...)));
+        stack.push_back(fmt::vformat(CHELPER_FMT_STR(fmt), CHELPER_FMT_ARGS(T...)({{args...}})));
 #endif
     }
 
@@ -43,7 +56,7 @@ namespace CHelper::Profile {
     void next(const fmt::format_string<T...> fmt, T &&...args) {
 #ifndef CHELPER_NO_FILESYSTEM
         pop();
-        stack.push_back(fmt::vformat(fmt.get(), fmt::make_format_args(args...)));
+        stack.push_back(fmt::vformat(CHELPER_FMT_STR(fmt), CHELPER_FMT_ARGS(T...)({{args...}})));
 #endif
     }
 

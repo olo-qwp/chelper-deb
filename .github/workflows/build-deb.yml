@@ -21,25 +21,47 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 安装编译依赖
+      - name: 安装系统依赖
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            g++ make dpkg-dev \
-            libfmt-dev libspdlog-dev libxxhash-dev rapidjson-dev libutfcpp-dev
+            g++ make cmake dpkg-dev \
+            libxxhash-dev libutfcpp-dev
 
-      - name: 编译 CHelper 内核与 CLI（静态链接 fmt/spdlog/xxhash）
+      - name: 下载 rapidjson (master)
+        run: |
+          git clone --depth 1 https://github.com/Tencent/rapidjson.git
+          ls rapidjson/include/rapidjson/document.h
+
+      - name: 编译 fmt 10.2.1
+        run: |
+          curl -sL -o fmt.tar.gz https://github.com/fmtlib/fmt/archive/refs/tags/10.2.1.tar.gz
+          tar xzf fmt.tar.gz
+          cmake -S fmt-10.2.1 -B fmt-build -DCMAKE_BUILD_TYPE=Release -DFMT_TEST=OFF -DFMT_DOC=OFF
+          cmake --build fmt-build -j2
+          ls -la fmt-build/libfmt.a
+
+      - name: 编译 spdlog (v1.x, 外部 fmt)
+        run: |
+          curl -sL -o spdlog.tar.gz https://github.com/gabime/spdlog/archive/refs/heads/v1.x.tar.gz
+          tar xzf spdlog.tar.gz
+          cmake -S spdlog-1.x -B spdlog-build -DCMAKE_BUILD_TYPE=Release \
+            -DSPDLOG_FMT_EXTERNAL=ON -DSPDLOG_BUILD_EXAMPLE=OFF \
+            -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF
+          cmake --build spdlog-build -j2
+          ls -la spdlog-build/libspdlog.a
+
+      - name: 编译 CHelper 内核与 CLI
         run: |
           mkdir -p build
           g++ -std=c++20 -O2 -D_GNU_SOURCE \
             -Iinclude -Ibuild-include -Isrc -I/usr/include/utf8cpp -Iserialization-include \
+            -Irapidjson/include -Ifmt-10.2.1/include -Ispdlog-1.x/include \
             $(find src/chelper -name '*.cpp' | sort) src/main.cpp \
             -o build/chelper \
-            -Wl,--start-group \
-            /usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/libspdlog.a \
-            /usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/libfmt.a \
+            spdlog-build/libspdlog.a fmt-build/libfmt.a \
             /usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/libxxhash.a \
-            -Wl,--end-group -pthread
+            -pthread
           file build/chelper
 
       - name: 打包 deb
@@ -84,12 +106,3 @@ jobs:
           name: chelper-cli-${{ matrix.arch }}
           path: build/*.deb
           if-no-files-found: error
-
-      - name: 发布 Release
-        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v0.1.0
-          name: chelper-cli v0.1.0
-          files: build/*.deb
-          generate_release_notes: true

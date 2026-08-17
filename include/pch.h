@@ -64,6 +64,7 @@
 #ifndef CHELPER_NO_FILESYSTEM
 #include <filesystem>
 #endif
+#include <fstream>
 // 用于字符串转整数或小数
 #include <cinttypes>
 // 字符串格式化
