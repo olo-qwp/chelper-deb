@@ -35,9 +35,9 @@ jobs:
 
       - name: 编译 fmt 10.2.1
         run: |
-          curl -sL -o fmt.tar.gz https://github.com/fmtlib/fmt/archive/refs/tags/10.2.1.tar.gz
+          curl -sL -o fmt.tar.gz https://github.com/fmtlib/fmt/archive/refs/tags/11.1.4.tar.gz
           tar xzf fmt.tar.gz
-          cmake -S fmt-10.2.1 -B fmt-build -DCMAKE_BUILD_TYPE=Release -DFMT_TEST=OFF -DFMT_DOC=OFF -DCMAKE_INSTALL_PREFIX=$PWD/fmt-install
+          cmake -S fmt-11.1.4 -B fmt-build -DCMAKE_BUILD_TYPE=Release -DFMT_TEST=OFF -DFMT_DOC=OFF -DCMAKE_INSTALL_PREFIX=$PWD/fmt-install
           cmake --build fmt-build -j2
           cmake --install fmt-build
           ls -la fmt-install/lib/libfmt.a fmt-install/lib/cmake/fmt/
@@ -48,7 +48,7 @@ jobs:
           tar xzf spdlog.tar.gz
           cmake -S spdlog-1.15.3 -B spdlog-build -DCMAKE_BUILD_TYPE=Release \
             -DSPDLOG_FMT_EXTERNAL=ON -DSPDLOG_BUILD_EXAMPLE=OFF \
-            -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF -DCMAKE_CXX_FLAGS="-I$PWD/fmt-10.2.1/include" \
+            -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF -DCMAKE_CXX_FLAGS="-I$PWD/fmt-11.1.4/include" \
             -Dfmt_DIR=$PWD/fmt-install/lib/cmake/fmt
           cmake --build spdlog-build -j2
           ls -la spdlog-build/libspdlog.a
@@ -58,7 +58,7 @@ jobs:
           mkdir -p build
           g++ -std=c++20 -O2 -D_GNU_SOURCE \
             -Iinclude -Ibuild-include -Isrc -I/usr/include/utf8cpp -Iserialization-include \
-            -Irapidjson/include -Ifmt-10.2.1/include -Ispdlog-1.15.3/include \
+            -Irapidjson/include -Ifmt-11.1.4/include -Ispdlog-1.15.3/include \
             $(find src/chelper -name '*.cpp' | sort) src/main.cpp \
             -o build/chelper \
             spdlog-build/libspdlog.a fmt-build/libfmt.a \
@@ -117,7 +117,7 @@ jobs:
 
       - name: 下载源码依赖 (fmt/spdlog/xxhash/utfcpp/rapidjson)
         run: |
-          curl -sL -o fmt.tar.gz https://github.com/fmtlib/fmt/archive/refs/tags/10.2.1.tar.gz
+          curl -sL -o fmt.tar.gz https://github.com/fmtlib/fmt/archive/refs/tags/11.1.4.tar.gz
           tar xzf fmt.tar.gz
           curl -sL -o spdlog.tar.gz https://github.com/gabime/spdlog/archive/refs/tags/v1.15.3.tar.gz
           tar xzf spdlog.tar.gz
@@ -126,11 +126,11 @@ jobs:
           curl -sL -o utfcpp.tar.gz https://github.com/nemtrif/utfcpp/archive/refs/heads/master.tar.gz
           tar xzf utfcpp.tar.gz
           git clone --depth 1 https://github.com/Tencent/rapidjson.git
-          ls -d fmt-10.2.1 spdlog-1.15.3 xxHash-release utfcpp-master rapidjson
+          ls -d fmt-11.1.4 spdlog-1.15.3 xxHash-release utfcpp-master rapidjson
 
       - name: 交叉编译 fmt (iOS arm64)
         run: |
-          cmake -S fmt-10.2.1 -B fmt-ios -DCMAKE_SYSTEM_NAME=iOS \
+          cmake -S fmt-11.1.4 -B fmt-ios -DCMAKE_SYSTEM_NAME=iOS \
             -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
             -DCMAKE_BUILD_TYPE=Release -DFMT_TEST=OFF -DFMT_DOC=OFF
           cmake --build fmt-ios -j3
@@ -141,7 +141,7 @@ jobs:
           cmake -S spdlog-1.15.3 -B spdlog-ios -DCMAKE_SYSTEM_NAME=iOS \
             -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
             -DCMAKE_BUILD_TYPE=Release -DSPDLOG_FMT_EXTERNAL=ON \
-            -DSPDLOG_BUILD_EXAMPLE=OFF -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF -DCMAKE_CXX_FLAGS="-I$PWD/fmt-10.2.1/include" \
+            -DSPDLOG_BUILD_EXAMPLE=OFF -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF -DCMAKE_CXX_FLAGS="-I$PWD/fmt-11.1.4/include" \
             -Dfmt_DIR=$PWD/fmt-ios
           cmake --build spdlog-ios -j3
           ls -la spdlog-ios/libspdlog.a
@@ -157,7 +157,7 @@ jobs:
           mkdir -p build
           clang++ -std=c++20 -O2 -UFMT_ENFORCE_COMPILE_STRING -target arm64-apple-ios13.0 -isysroot $SDK \
             -Iinclude -Ibuild-include -Isrc -Irapidjson/include \
-            -Ifmt-10.2.1/include -Ispdlog-1.15.3/include -Iutfcpp-master/source -IxxHash-release \
+            -Ifmt-11.1.4/include -Ispdlog-1.15.3/include -Iutfcpp-master/source -IxxHash-release \
             -Iserialization-include \
             $(find src/chelper -name '*.cpp' | sort) src/main.cpp \
             spdlog-ios/libspdlog.a fmt-ios/libfmt.a xxhash-ios.o \
@@ -168,11 +168,11 @@ jobs:
 
       - name: 编译 fmt/spdlog (macOS native)
         run: |
-          cmake -S fmt-10.2.1 -B fmt-macos -DCMAKE_BUILD_TYPE=Release -DFMT_TEST=OFF -DFMT_DOC=OFF
+          cmake -S fmt-11.1.4 -B fmt-macos -DCMAKE_BUILD_TYPE=Release -DFMT_TEST=OFF -DFMT_DOC=OFF
           cmake --build fmt-macos -j3
           cmake -S spdlog-1.15.3 -B spdlog-macos -DCMAKE_BUILD_TYPE=Release \
             -DSPDLOG_FMT_EXTERNAL=ON -DSPDLOG_BUILD_EXAMPLE=OFF \
-            -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF -DCMAKE_CXX_FLAGS="-I$PWD/fmt-10.2.1/include" \
+            -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF -DCMAKE_CXX_FLAGS="-I$PWD/fmt-11.1.4/include" \
             -Dfmt_DIR=$PWD/fmt-macos
           cmake --build spdlog-macos -j3
           ls -la fmt-macos/libfmt.a spdlog-macos/libspdlog.a
@@ -186,7 +186,7 @@ jobs:
           mkdir -p build
           clang++ -std=c++20 -O2 -UFMT_ENFORCE_COMPILE_STRING \
             -Iinclude -Ibuild-include -Isrc -Irapidjson/include \
-            -Ifmt-10.2.1/include -Ispdlog-1.15.3/include -Iutfcpp-master/source -IxxHash-release \
+            -Ifmt-11.1.4/include -Ispdlog-1.15.3/include -Iutfcpp-master/source -IxxHash-release \
             -Iserialization-include \
             $(find src/chelper -name '*.cpp' | sort) src/main.cpp \
             spdlog-macos/libspdlog.a fmt-macos/libfmt.a xxhash-macos.o \
