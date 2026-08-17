@@ -23,6 +23,7 @@
 
 #include <fmt/base.h>
 #include <fmt/format.h>
+#include <spdlog/spdlog.h>
 #include <string>
 #include <vector>
 

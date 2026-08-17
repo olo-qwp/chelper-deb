@@ -86,7 +86,7 @@ static void printAnalysis(CHelper::CHelperCore &core) {
         for (const auto &s : *sugs) {
             std::string desc;
             if (s.content->description.has_value() && !s.content->description->empty()) {
-                desc = Color::DIM + " (" + u16to8(s.content->description.value()) + ")" + Color::RESET;
+                desc = std::string(Color::DIM) + " (" + u16to8(s.content->description.value()) + ")" + Color::RESET;
             }
             std::cout << "[" << i << "]" << u16to8(s.content->name) << desc << "  ";
             ++i;
