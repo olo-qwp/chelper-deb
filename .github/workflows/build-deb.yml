@@ -69,7 +69,7 @@ jobs:
       - name: 打包 deb
         run: |
           set -e
-          PKG=build/chelper-cli_0.1.0-1_${{ matrix.arch }}
+          PKG=build/chelper-cli_0.2.0-1_${{ matrix.arch }}
           mkdir -p $PKG/DEBIAN \
                    $PKG/usr/bin \
                    $PKG/usr/share/chelper \
@@ -79,7 +79,7 @@ jobs:
           cp resources/blockFixData.json $PKG/usr/share/chelper/
           cat > $PKG/DEBIAN/control <<EOF
           Package: chelper-cli
-          Version: 0.1.0-1
+          Version: 0.2.0-1
           Section: games
           Priority: optional
           Architecture: ${{ matrix.arch }}
@@ -193,6 +193,36 @@ jobs:
             -lc++ -o build/chelper-macos
           file build/chelper-macos
 
+      - name: 打包越狱 deb (iphoneos-arm64)
+        run: |
+          set -e
+          PKG=build/chelper-cli_0.2.0-1_iphoneos-arm64
+          mkdir -p $PKG/DEBIAN $PKG/usr/bin $PKG/usr/share/chelper $PKG/usr/share/doc/chelper-cli
+          cp build/chelper-ios $PKG/usr/bin/chelper
+          chmod 755 $PKG/usr/bin/chelper
+          cp resources/*.cpack resources/blockFixData.json $PKG/usr/share/chelper/
+          cat > $PKG/DEBIAN/control <<EOF
+          Package: com.chelper.cli
+          Version: 0.2.0-1
+          Section: Games
+          Priority: optional
+          Architecture: iphoneos-arm64
+          Maintainer: olo-qwp <olo-qwp@users.noreply.github.com>
+          Installed-Size: $(du -sk $PKG/usr | cut -f1)
+          Depends: firmware (>= 13.0)
+          Description: 我的世界基岩版命令辅助器（iOS 命令行版）
+           基于 CHelper 开源内核 (GPLv3)。提供命令补全、语法检查、
+           命令结构展示、旧语法转新语法。交互模式带终端悬浮补全窗。
+           Homepage: https://github.com/Yancey2023/CHelper
+          EOF
+          cat > $PKG/usr/share/doc/chelper-cli/copyright <<EOF
+          chelper-cli 0.2.0
+          Copyright (C) 2026 Yancey (CHelper), chelper-cli contributors
+          基于 CHelper 内核 (GPLv3): https://github.com/Yancey2023/CHelper
+          EOF
+          dpkg-deb -Zgzip --build --root-owner-group $PKG
+          ls -lh build/*.deb
+
       - name: 上传 Mach-O 产物
         uses: actions/upload-artifact@v4
         with:
@@ -200,4 +230,5 @@ jobs:
           path: |
             build/chelper-ios
             build/chelper-macos
+            build/*.deb
           if-no-files-found: error
