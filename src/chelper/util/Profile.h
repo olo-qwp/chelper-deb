@@ -23,6 +23,7 @@
 
 #include <fmt/base.h>
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <vector>
@@ -33,6 +34,13 @@
 #define CHELPER_FMT_VFORMAT(f, ...) fmt::vformat((f).get(), fmt::make_format_args(__VA_ARGS__))
 #else
 #define CHELPER_FMT_VFORMAT(f, ...) fmt::vformat((f).str, fmt::vargs<__VA_ARGS__>{{__VA_ARGS__}})
+#endif
+
+// fmt 11 将 join 移至 fmt::ranges
+#if FMT_VERSION >= 110000
+#define CHELPER_FMT_JOIN(...) fmt::ranges::join(__VA_ARGS__)
+#else
+#define CHELPER_FMT_JOIN(...) fmt::join(__VA_ARGS__)
 #endif
 
 /**
