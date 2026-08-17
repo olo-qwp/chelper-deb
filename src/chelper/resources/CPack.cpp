@@ -247,7 +247,12 @@ namespace CHelper {
             }
         }
         for (const auto &item: *commands) {
-            Profile::next(R"(init command: "{}")", FORMAT_ARG(utf8::utf16to8(fmt::format(u"{}", fmt::join(item.name, u",")))));
+            std::u16string commandNames;
+            for (size_t i = 0; i < item.name.size(); ++i) {
+                if (i > 0) commandNames += u",";
+                commandNames += item.name[i];
+            }
+            Profile::next(R"(init command: "{}")", FORMAT_ARG(utf8::utf16to8(commandNames)));
             Node::initNode(item, *this);
         }
         Profile::next("sort command nodes");

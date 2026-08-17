@@ -85,10 +85,10 @@ static void printAnalysis(CHelper::CHelperCore &core) {
         int i = 1;
         for (const auto &s : *sugs) {
             std::string desc;
-            if (s->content->description.has_value() && !s->content->description->empty()) {
-                desc = Color::DIM + " (" + u16to8(s->content->description.value()) + ")" + Color::RESET;
+            if (s.content->description.has_value() && !s.content->description->empty()) {
+                desc = Color::DIM + " (" + u16to8(s.content->description.value()) + ")" + Color::RESET;
             }
-            std::cout << "[" << i << "]" << u16to8(s->content->name) << desc << "  ";
+            std::cout << "[" << i << "]" << u16to8(s.content->name) << desc << "  ";
             ++i;
         }
         std::cout << "\n";
@@ -199,9 +199,9 @@ int main(int argc, char **argv) {
         auto *sugs = core->getSuggestions();
         if (sugs) {
             for (const auto &s : *sugs) {
-                std::cout << u16to8(s->content->name);
-                if (s->content->description.has_value() && !s->content->description->empty()) {
-                    std::cout << "\t" << u16to8(s->content->description.value());
+                std::cout << u16to8(s.content->name);
+                if (s.content->description.has_value() && !s.content->description->empty()) {
+                    std::cout << "\t" << u16to8(s.content->description.value());
                 }
                 std::cout << "\n";
             }

@@ -23,6 +23,8 @@
 
 #include <fmt/base.h>
 #include <fmt/format.h>
+#include <string>
+#include <vector>
 
 // fmt 版本兼容：fmt 10+ 的 basic_format_string::str 为私有（用 get()，vargs 已移除），
 // fmt 9 及更早使用公开的 str 与 fmt::vargs
