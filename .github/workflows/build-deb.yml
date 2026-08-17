@@ -155,9 +155,9 @@ jobs:
         run: |
           SDK=$(xcrun --sdk iphoneos --show-sdk-path)
           mkdir -p build
-          clang++ -std=c++20 -O2 -target arm64-apple-ios13.0 -isysroot $SDK \
+          clang++ -std=c++20 -O2 -UFMT_ENFORCE_COMPILE_STRING -target arm64-apple-ios13.0 -isysroot $SDK \
             -Iinclude -Ibuild-include -Isrc -Irapidjson/include \
-            -Ifmt-10.2.1/include -Ispdlog-1.x/include -Iutfcpp-master/source \
+            -Ifmt-10.2.1/include -Ispdlog-1.x/include -Iutfcpp-master/source -IxxHash-release \
             -Iserialization-include \
             $(find src/chelper -name '*.cpp' | sort) src/main.cpp \
             spdlog-ios/libspdlog.a fmt-ios/libfmt.a xxhash-ios.o \
@@ -184,9 +184,9 @@ jobs:
       - name: 编译 CHelper (macOS arm64 Mach-O)
         run: |
           mkdir -p build
-          clang++ -std=c++20 -O2 \
+          clang++ -std=c++20 -O2 -UFMT_ENFORCE_COMPILE_STRING \
             -Iinclude -Ibuild-include -Isrc -Irapidjson/include \
-            -Ifmt-10.2.1/include -Ispdlog-1.x/include -Iutfcpp-master/source \
+            -Ifmt-10.2.1/include -Ispdlog-1.x/include -Iutfcpp-master/source -IxxHash-release \
             -Iserialization-include \
             $(find src/chelper -name '*.cpp' | sort) src/main.cpp \
             spdlog-macos/libspdlog.a fmt-macos/libfmt.a xxhash-macos.o \
