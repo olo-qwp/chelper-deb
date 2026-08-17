@@ -36,12 +36,8 @@
 #define CHELPER_FMT_VFORMAT(f, ...) fmt::vformat((f).str, fmt::vargs<__VA_ARGS__>{{__VA_ARGS__}})
 #endif
 
-// fmt 11 将 join 移至 fmt::ranges
-#if FMT_VERSION >= 110000
-#define CHELPER_FMT_JOIN(...) fmt::ranges::join(__VA_ARGS__)
-#else
+// fmt 11 将 join 移至 fmt/ranges.h（命名空间不变，仍是 fmt::join）
 #define CHELPER_FMT_JOIN(...) fmt::join(__VA_ARGS__)
-#endif
 
 /**
  * 跟踪代码的运行，为了在遇到bug的时候方便排查错误的位置
