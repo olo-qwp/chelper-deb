@@ -103,7 +103,7 @@ static std::string truncate(const std::string &s, size_t max) {
 // data: 建议列表 (名称+描述)，highlight: 当前高亮索引
 static void renderFloating(CHelper::CHelperCore &core,
                            const std::u16string &input, size_t cursor,
-                           const std::vector<std::shared_ptr<CHelper::AutoSuggestion::Suggestion>> &sugs,
+                           const std::vector<CHelper::AutoSuggestion::Suggestion> &sugs,
                            size_t highlight) {
     int W = termWidth();
     std::string line = u16to8(input);
@@ -123,13 +123,13 @@ static void renderFloating(CHelper::CHelperCore &core,
         std::cout << Color::MAGENTA << "┌─ 补全建议 ──────────────────────────────" << Color::RESET << "\n";
         for (size_t i = 0; i < n; ++i) {
             const auto &s = sugs[i];
-            std::string name = u16to8(s->content->name);
+            std::string name = u16to8(s.content->name);
             std::string desc;
-            if (s->content->description.has_value() && !s->content->description->empty()) {
-                desc = u16to8(s->content->description.value());
+            if (s.content->description.has_value() && !s.content->description->empty()) {
+                desc = u16to8(s.content->description.value());
             }
             std::string entry = "  " + name;
-            if (!desc.empty()) entry += Color::DIM + "  " + desc + Color::RESET;
+            if (!desc.empty()) entry += std::string(Color::DIM) + "  " + desc + Color::RESET;
             entry = truncate(entry, (size_t)W - 2);
             if (i == highlight) {
                 std::cout << Color::REVERSE << entry << Color::RESET << "\n";
@@ -158,10 +158,10 @@ static void renderFloating(CHelper::CHelperCore &core,
     std::cout.flush();
 }
 
-// 把建议列表转成 vector（getSuggestions 返回指针，转换以便保存引用）
-static std::vector<std::shared_ptr<CHelper::AutoSuggestion::Suggestion>>
+// 把建议列表转成 vector（getSuggestions 返回 vector<Suggestion>*，拷贝一份）
+static std::vector<CHelper::AutoSuggestion::Suggestion>
 collectSuggestions(CHelper::CHelperCore &core) {
-    std::vector<std::shared_ptr<CHelper::AutoSuggestion::Suggestion>> v;
+    std::vector<CHelper::AutoSuggestion::Suggestion> v;
     auto *sugs = core.getSuggestions();
     if (sugs) v = *sugs;
     return v;
@@ -391,7 +391,7 @@ int main(int argc, char **argv) {
         if (sugs && !sugs->empty()) {
             std::cout << Color::GREEN << "建议: " << Color::RESET;
             for (const auto &s : *sugs) {
-                std::cout << u16to8(s->content->name) << "  ";
+                std::cout << u16to8(s.content->name) << "  ";
             }
             std::cout << "\n";
         }
@@ -399,9 +399,9 @@ int main(int argc, char **argv) {
         auto *sugs = core->getSuggestions();
         if (sugs) {
             for (const auto &s : *sugs) {
-                std::cout << u16to8(s->content->name);
-                if (s->content->description.has_value() && !s->content->description->empty()) {
-                    std::cout << "\t" << u16to8(s->content->description.value());
+                std::cout << u16to8(s.content->name);
+                if (s.content->description.has_value() && !s.content->description->empty()) {
+                    std::cout << "\t" << u16to8(s.content->description.value());
                 }
                 std::cout << "\n";
             }
