@@ -48,7 +48,7 @@ jobs:
           tar xzf spdlog.tar.gz
           cmake -S spdlog-1.15.3 -B spdlog-build -DCMAKE_BUILD_TYPE=Release \
             -DSPDLOG_FMT_EXTERNAL=ON -DSPDLOG_BUILD_EXAMPLE=OFF \
-            -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF \
+            -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF -DCMAKE_CXX_FLAGS="-I$PWD/fmt-10.2.1/include" \
             -Dfmt_DIR=$PWD/fmt-install/lib/cmake/fmt
           cmake --build spdlog-build -j2
           ls -la spdlog-build/libspdlog.a
@@ -141,7 +141,7 @@ jobs:
           cmake -S spdlog-1.15.3 -B spdlog-ios -DCMAKE_SYSTEM_NAME=iOS \
             -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
             -DCMAKE_BUILD_TYPE=Release -DSPDLOG_FMT_EXTERNAL=ON \
-            -DSPDLOG_BUILD_EXAMPLE=OFF -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF \
+            -DSPDLOG_BUILD_EXAMPLE=OFF -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF -DCMAKE_CXX_FLAGS="-I$PWD/fmt-10.2.1/include" \
             -Dfmt_DIR=$PWD/fmt-ios
           cmake --build spdlog-ios -j3
           ls -la spdlog-ios/libspdlog.a
@@ -172,7 +172,7 @@ jobs:
           cmake --build fmt-macos -j3
           cmake -S spdlog-1.15.3 -B spdlog-macos -DCMAKE_BUILD_TYPE=Release \
             -DSPDLOG_FMT_EXTERNAL=ON -DSPDLOG_BUILD_EXAMPLE=OFF \
-            -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF \
+            -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF -DCMAKE_CXX_FLAGS="-I$PWD/fmt-10.2.1/include" \
             -Dfmt_DIR=$PWD/fmt-macos
           cmake --build spdlog-macos -j3
           ls -la fmt-macos/libfmt.a spdlog-macos/libspdlog.a
