@@ -37,9 +37,10 @@ jobs:
         run: |
           curl -sL -o fmt.tar.gz https://github.com/fmtlib/fmt/archive/refs/tags/10.2.1.tar.gz
           tar xzf fmt.tar.gz
-          cmake -S fmt-10.2.1 -B fmt-build -DCMAKE_BUILD_TYPE=Release -DFMT_TEST=OFF -DFMT_DOC=OFF
+          cmake -S fmt-10.2.1 -B fmt-build -DCMAKE_BUILD_TYPE=Release -DFMT_TEST=OFF -DFMT_DOC=OFF -DCMAKE_INSTALL_PREFIX=$PWD/fmt-install
           cmake --build fmt-build -j2
-          ls -la fmt-build/libfmt.a
+          cmake --install fmt-build
+          ls -la fmt-install/lib/libfmt.a fmt-install/lib/cmake/fmt/
 
       - name: 编译 spdlog (v1.x, 外部 fmt)
         run: |
@@ -47,7 +48,8 @@ jobs:
           tar xzf spdlog.tar.gz
           cmake -S spdlog-1.x -B spdlog-build -DCMAKE_BUILD_TYPE=Release \
             -DSPDLOG_FMT_EXTERNAL=ON -DSPDLOG_BUILD_EXAMPLE=OFF \
-            -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF
+            -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF \
+            -Dfmt_DIR=$PWD/fmt-install/lib/cmake/fmt
           cmake --build spdlog-build -j2
           ls -la spdlog-build/libspdlog.a
 
