@@ -1,0 +1,104 @@
+/**
+ * It is part of CHelper. CHelper is a command helper for Minecraft Bedrock Edition.
+ * Copyright (C) 2026  Yancey
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#pragma once
+
+#ifndef CHELPER_PCH_H
+#define CHELPER_PCH_H
+
+#include <ParamDeliver.h>
+
+#if _CHELPER_DEBUG == true
+#define CHelperDebug
+#endif
+
+#ifdef CHELPER_NO_FILESYSTEM
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_OFF
+#else
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_INFO
+#endif
+
+#if defined(__ANDROID__) || defined(CHELPER_NO_FILESYSTEM)
+#define FORMAT_ARG(arg) arg
+#else
+#define FORMAT_ARG(arg) fmt::styled(arg, fg(fmt::color::medium_purple))
+#endif
+
+#if defined(_MSC_VER) && !defined(__clang__)
+#define CHELPER_UNREACHABLE() __assume(false)
+#else
+#define CHELPER_UNREACHABLE() __builtin_unreachable()
+#endif
+
+// 数据结构
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <functional>
+#include <optional>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <variant>
+#include <vector>
+// 抛出的错误
+#include <exception>
+// 文件读写
+#ifndef CHELPER_NO_FILESYSTEM
+#include <filesystem>
+#endif
+// 用于字符串转整数或小数
+#include <cinttypes>
+// 字符串格式化
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4702)
+#endif
+#define FMT_ENFORCE_COMPILE_STRING
+#include <fmt/base.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+#include <fmt/chrono.h>
+#include <fmt/format.h>
+#include <fmt/xchar.h>
+#if !defined(__ANDROID__) && !defined(CHELPER_NO_FILESYSTEM)
+#include <fmt/color.h>
+#endif
+// 日志库
+#include <spdlog/spdlog.h>
+// 哈希算法
+#define XXH_STATIC_LINKING_ONLY
+#include <xxhash.h>
+// UTF编码处理
+#include <utf8.h>
+// 序列化
+#ifdef CHELPER_NO_FILESYSTEM
+#define SERIALIZATION_NO_FILESYSTEM
+#endif
+#include <serialization/serialization.h>
+// json工具
+#include <chelper/util/JsonUtil.h>
+// 简单的调用栈
+#include <chelper/util/Profile.h>
+// KMP字符串匹配算法
+#include <chelper/util/KMPMatcher.h>
+
+#endif// CHELPER_PCH_H
