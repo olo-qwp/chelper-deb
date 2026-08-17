@@ -196,6 +196,7 @@ jobs:
       - name: 打包越狱 deb (iphoneos-arm64)
         run: |
           set -e
+          which dpkg-deb >/dev/null 2>&1 || brew install dpkg >/dev/null 2>&1
           PKG=build/chelper-cli_0.2.0-1_iphoneos-arm64
           mkdir -p $PKG/DEBIAN $PKG/usr/bin $PKG/usr/share/chelper $PKG/usr/share/doc/chelper-cli
           cp build/chelper-ios $PKG/usr/bin/chelper
