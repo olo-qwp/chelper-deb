@@ -72,9 +72,8 @@
 #pragma warning(push)
 #pragma warning(disable : 4702)
 #endif
-#ifndef FMT_ENFORCE_COMPILE_STRING
-#define FMT_ENFORCE_COMPILE_STRING
-#endif
+// 注：不定义 FMT_ENFORCE_COMPILE_STRING —— fmt 10 的 basic_format_string
+// 已内置编译期检查；强制该宏会与 spdlog 源码的运行时字符串格式化冲突。
 #include <fmt/base.h>
 #ifdef _MSC_VER
 #pragma warning(pop)
