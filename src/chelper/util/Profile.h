@@ -27,11 +27,9 @@
 // fmt 版本兼容：fmt 10+ 的 basic_format_string::str 为私有（用 get()，vargs 已移除），
 // fmt 9 及更早使用公开的 str 与 fmt::vargs
 #if FMT_VERSION >= 100000
-#define CHELPER_FMT_STR(f) (f).get()
-#define CHELPER_FMT_ARGS(...) fmt::make_format_args(__VA_ARGS__)
+#define CHELPER_FMT_VFORMAT(f, ...) fmt::vformat((f).get(), fmt::make_format_args(__VA_ARGS__))
 #else
-#define CHELPER_FMT_STR(f) (f).str
-#define CHELPER_FMT_ARGS(...) fmt::vargs<__VA_ARGS__>
+#define CHELPER_FMT_VFORMAT(f, ...) fmt::vformat((f).str, fmt::vargs<__VA_ARGS__>{{__VA_ARGS__}})
 #endif
 
 /**
@@ -46,7 +44,7 @@ namespace CHelper::Profile {
     template<typename... T>
     void push(const fmt::format_string<T...> fmt, T &&...args) {
 #ifndef CHELPER_NO_FILESYSTEM
-        stack.push_back(fmt::vformat(CHELPER_FMT_STR(fmt), CHELPER_FMT_ARGS(T...)({{args...}})));
+        stack.push_back(CHELPER_FMT_VFORMAT(fmt, args...));
 #endif
     }
 
@@ -56,7 +54,7 @@ namespace CHelper::Profile {
     void next(const fmt::format_string<T...> fmt, T &&...args) {
 #ifndef CHELPER_NO_FILESYSTEM
         pop();
-        stack.push_back(fmt::vformat(CHELPER_FMT_STR(fmt), CHELPER_FMT_ARGS(T...)({{args...}})));
+        stack.push_back(CHELPER_FMT_VFORMAT(fmt, args...));
 #endif
     }
 
