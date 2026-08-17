@@ -1,4 +1,4 @@
-name: Build CHelper deb
+name: Build CHelper packages
 
 on:
   push:
@@ -107,4 +107,97 @@ jobs:
         with:
           name: chelper-cli-${{ matrix.arch }}
           path: build/*.deb
+          if-no-files-found: error
+
+  macho:
+    runs-on: macos-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 下载源码依赖 (fmt/spdlog/xxhash/utfcpp/rapidjson)
+        run: |
+          curl -sL -o fmt.tar.gz https://github.com/fmtlib/fmt/archive/refs/tags/10.2.1.tar.gz
+          tar xzf fmt.tar.gz
+          curl -sL -o spdlog.tar.gz https://github.com/gabime/spdlog/archive/refs/heads/v1.x.tar.gz
+          tar xzf spdlog.tar.gz
+          curl -sL -o xxhash.tar.gz https://github.com/Cyan4973/xxHash/archive/refs/heads/release.tar.gz
+          tar xzf xxhash.tar.gz
+          curl -sL -o utfcpp.tar.gz https://github.com/nemtrif/utfcpp/archive/refs/heads/master.tar.gz
+          tar xzf utfcpp.tar.gz
+          git clone --depth 1 https://github.com/Tencent/rapidjson.git
+          ls -d fmt-10.2.1 spdlog-1.x xxHash-release utfcpp-master rapidjson
+
+      - name: 交叉编译 fmt (iOS arm64)
+        run: |
+          cmake -S fmt-10.2.1 -B fmt-ios -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
+            -DCMAKE_BUILD_TYPE=Release -DFMT_TEST=OFF -DFMT_DOC=OFF
+          cmake --build fmt-ios -j3
+          ls -la fmt-ios/libfmt.a
+
+      - name: 交叉编译 spdlog (iOS arm64, 外部 fmt)
+        run: |
+          cmake -S spdlog-1.x -B spdlog-ios -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
+            -DCMAKE_BUILD_TYPE=Release -DSPDLOG_FMT_EXTERNAL=ON \
+            -DSPDLOG_BUILD_EXAMPLE=OFF -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF \
+            -Dfmt_DIR=$PWD/fmt-ios
+          cmake --build spdlog-ios -j3
+          ls -la spdlog-ios/libspdlog.a
+
+      - name: 编译 xxhash (iOS arm64)
+        run: |
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          clang -c -O2 -target arm64-apple-ios13.0 -isysroot $SDK xxHash-release/xxhash.c -o xxhash-ios.o
+
+      - name: 编译 CHelper (iOS arm64 Mach-O)
+        run: |
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          mkdir -p build
+          clang++ -std=c++20 -O2 -target arm64-apple-ios13.0 -isysroot $SDK \
+            -Iinclude -Ibuild-include -Isrc -Irapidjson/include \
+            -Ifmt-10.2.1/include -Ispdlog-1.x/include -Iutfcpp-master/source \
+            -Iserialization-include \
+            $(find src/chelper -name '*.cpp' | sort) src/main.cpp \
+            spdlog-ios/libspdlog.a fmt-ios/libfmt.a xxhash-ios.o \
+            -lc++ -o build/chelper-ios
+          codesign -s - build/chelper-ios
+          file build/chelper-ios
+          lipo -info build/chelper-ios
+
+      - name: 编译 fmt/spdlog (macOS native)
+        run: |
+          cmake -S fmt-10.2.1 -B fmt-macos -DCMAKE_BUILD_TYPE=Release -DFMT_TEST=OFF -DFMT_DOC=OFF
+          cmake --build fmt-macos -j3
+          cmake -S spdlog-1.x -B spdlog-macos -DCMAKE_BUILD_TYPE=Release \
+            -DSPDLOG_FMT_EXTERNAL=ON -DSPDLOG_BUILD_EXAMPLE=OFF \
+            -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_BUILD_BENCH=OFF \
+            -Dfmt_DIR=$PWD/fmt-macos
+          cmake --build spdlog-macos -j3
+          ls -la fmt-macos/libfmt.a spdlog-macos/libspdlog.a
+
+      - name: 编译 xxhash (macOS arm64)
+        run: |
+          clang -c -O2 xxHash-release/xxhash.c -o xxhash-macos.o
+
+      - name: 编译 CHelper (macOS arm64 Mach-O)
+        run: |
+          mkdir -p build
+          clang++ -std=c++20 -O2 \
+            -Iinclude -Ibuild-include -Isrc -Irapidjson/include \
+            -Ifmt-10.2.1/include -Ispdlog-1.x/include -Iutfcpp-master/source \
+            -Iserialization-include \
+            $(find src/chelper -name '*.cpp' | sort) src/main.cpp \
+            spdlog-macos/libspdlog.a fmt-macos/libfmt.a xxhash-macos.o \
+            -lc++ -o build/chelper-macos
+          file build/chelper-macos
+
+      - name: 上传 Mach-O 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: chelper-macho
+          path: |
+            build/chelper-ios
+            build/chelper-macos
           if-no-files-found: error
