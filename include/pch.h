@@ -72,7 +72,9 @@
 #pragma warning(push)
 #pragma warning(disable : 4702)
 #endif
+#ifndef FMT_ENFORCE_COMPILE_STRING
 #define FMT_ENFORCE_COMPILE_STRING
+#endif
 #include <fmt/base.h>
 #ifdef _MSC_VER
 #pragma warning(pop)
