@@ -236,8 +236,6 @@ static void showFloatingBall() {
     [ballWin makeKeyAndVisible];
 }
 
-@interface CHelperTweakAction : NSObject
-@end
 @implementation CHelperTweakAction
 + (void)ballTap { showPanel(); }
 + (void)ballPan:(UIPanGestureRecognizer *)g {
