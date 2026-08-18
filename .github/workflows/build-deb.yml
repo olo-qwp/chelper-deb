@@ -193,31 +193,54 @@ jobs:
             -lc++ -o build/chelper-macos
           file build/chelper-macos
 
-      - name: 打包越狱 deb (iphoneos-arm64)
+      - name: 编译 CHelperTweak.dylib (iOS 悬浮窗插件)
+        run: |
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          clang++ -std=c++20 -O2 -fobjc-arc -dynamiclib \
+            -target arm64-apple-ios13.0 -isysroot $SDK \
+            -Iinclude -Ibuild-include -Isrc -Irapidjson/include \
+            -Ifmt-11.1.4/include -Ispdlog-1.15.3/include -Iutfcpp-master/source -IxxHash-release \
+            -Iserialization-include \
+            $(find src/chelper -name '*.cpp' | sort) tweak/CHelperTweak.mm \
+            spdlog-ios/libspdlog.a fmt-ios/libfmt.a xxhash-ios.o \
+            -framework UIKit -framework Foundation \
+            -o build/CHelperTweak.dylib
+          codesign -s - build/CHelperTweak.dylib
+          file build/CHelperTweak.dylib
+
+      - name: 打包越狱 deb (iphoneos-arm64, tweak)
         run: |
           set -e
-          which dpkg-deb >/dev/null 2>&1 || brew install dpkg >/dev/null 2>&1
-          PKG=build/chelper-cli_0.2.0-1_iphoneos-arm64
-          mkdir -p $PKG/DEBIAN $PKG/usr/bin $PKG/usr/share/chelper $PKG/usr/share/doc/chelper-cli
+          PKG=build/chelper-cli_0.3.0-1_iphoneos-arm64
+          mkdir -p $PKG/DEBIAN \
+                   $PKG/usr/bin $PKG/usr/share/chelper $PKG/usr/share/doc/chelper-cli \
+                   $PKG/DynamicLibraries \
+                   $PKG/Library/MobileSubstrate/DynamicLibraries
           cp build/chelper-ios $PKG/usr/bin/chelper
           chmod 755 $PKG/usr/bin/chelper
           cp resources/*.cpack resources/blockFixData.json $PKG/usr/share/chelper/
+          # tweak 插件（标准布局 + 根目录双保险）
+          cp build/CHelperTweak.dylib $PKG/DynamicLibraries/
+          cp tweak/CHelperTweak.plist $PKG/DynamicLibraries/
+          cp build/CHelperTweak.dylib $PKG/Library/MobileSubstrate/DynamicLibraries/
+          cp tweak/CHelperTweak.plist $PKG/Library/MobileSubstrate/DynamicLibraries/
           cat > $PKG/DEBIAN/control <<EOF
           Package: com.chelper.cli
-          Version: 0.2.0-1
+          Version: 0.3.0-1
           Section: Games
           Priority: optional
           Architecture: iphoneos-arm64
           Maintainer: olo-qwp <olo-qwp@users.noreply.github.com>
           Installed-Size: $(du -sk $PKG/usr | cut -f1)
-          Depends: firmware (>= 13.0)
-          Description: 我的世界基岩版命令辅助器（iOS 命令行版）
-           基于 CHelper 开源内核 (GPLv3)。提供命令补全、语法检查、
-           命令结构展示、旧语法转新语法。交互模式带终端悬浮补全窗。
+          Depends: firmware (>= 13.0), mobilesubstrate (>= 0.9.5000)
+          Description: 我的世界基岩版命令辅助器（游戏内悬浮窗）
+           基于 CHelper 开源内核 (GPLv3)。
+           游戏内悬浮球 + 命令输入面板：实时补全、语法提示、
+           一键复制到聊天框。附命令行版 chelper。
            Homepage: https://github.com/Yancey2023/CHelper
           EOF
           cat > $PKG/usr/share/doc/chelper-cli/copyright <<EOF
-          chelper-cli 0.2.0
+          chelper-cli 0.3.0
           Copyright (C) 2026 Yancey (CHelper), chelper-cli contributors
           基于 CHelper 内核 (GPLv3): https://github.com/Yancey2023/CHelper
           EOF
