@@ -26,6 +26,7 @@ static CHelper::CHelperCore *gCore = nullptr;
 static UIWindow *gPanelWindow = nil;
 static UITextField *gCmdField = nil;
 static UITableView *gSugTable = nil;
+static id gTableDelegate = nil;
 static NSMutableArray<NSString *> *gSugNames = nil;
 static NSMutableArray<NSString *> *gSugDescs = nil;
 
@@ -184,8 +185,8 @@ static void showPanel() {
     gSugTable = [[UITableView alloc] initWithFrame:CGRectMake(14, 94, pw - 28, ph - 150) style:UITableViewStylePlain];
     gSugTable.backgroundColor = UIColor.clearColor;
     gSugTable.separatorColor = [UIColor colorWithWhite:0.35 alpha:1];
-    gSugTable.delegate = [CHelperTableDelegate new];
-    gSugTable.dataSource = [CHelperTableDelegate new];
+    gSugTable.delegate = gTableDelegate;
+    gSugTable.dataSource = gTableDelegate;
 
     UIButton *copyBtn = [UIButton buttonWithType:UIButtonTypeSystem];
     copyBtn.frame = CGRectMake(14, ph - 44, pw - 28, 34);
@@ -204,6 +205,7 @@ static void showPanel() {
 
     gSugNames = [NSMutableArray new];
     gSugDescs = [NSMutableArray new];
+    gTableDelegate = [CHelperTableDelegate new];
 
     [w makeKeyAndVisible];
     [gCmdField becomeFirstResponder];
