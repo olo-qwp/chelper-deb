@@ -14,6 +14,14 @@
 
 @class CHelperTweakAction;
 
+@interface CHelperTweakAction : NSObject
++ (void)ballTap;
++ (void)ballPan:(UIPanGestureRecognizer *)g;
++ (void)textChangedAction:(UITextField *)field;
++ (void)copyAction;
++ (void)closeAction;
+@end
+
 static CHelper::CHelperCore *gCore = nullptr;
 static UIWindow *gPanelWindow = nil;
 static UITextField *gCmdField = nil;
