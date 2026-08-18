@@ -203,7 +203,7 @@ jobs:
             -Iserialization-include \
             $(find src/chelper -name '*.cpp' | sort) tweak/CHelperTweak.mm \
             spdlog-ios/libspdlog.a fmt-ios/libfmt.a xxhash-ios.o \
-            -framework UIKit -framework Foundation \
+            -framework UIKit -framework Foundation -framework CoreGraphics \
             -o build/CHelperTweak.dylib
           codesign -s - build/CHelperTweak.dylib
           file build/CHelperTweak.dylib
