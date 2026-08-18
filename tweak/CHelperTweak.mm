@@ -52,9 +52,13 @@ static void initCore() {
     for (int i = 0; paths[i]; ++i) {
         if ([[NSFileManager defaultManager] fileExistsAtPath:[NSString stringWithUTF8String:paths[i]]]) {
             gCore = CHelper::CHelperCore::createByDirectory(paths[i]);
-            if (gCore) return;
+            if (gCore) {
+                NSLog(@"[CHelperTweak] core loaded from %s", paths[i]);
+                return;
+            }
         }
     }
+    NSLog(@"[CHelperTweak] FAILED to load core (cpack not found)");
 }
 
 static void refreshSuggestions() {
@@ -252,11 +256,14 @@ static void showFloatingBall() {
 
 __attribute__((constructor))
 static void CHelperTweakInit() {
+    NSLog(@"[CHelperTweak] loaded, bundle: %@",
+          [[NSBundle mainBundle] bundleIdentifier] ?: @"unknown");
     [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification
                                                       object:nil queue:nil usingBlock:^(NSNotification *note) {
         dispatch_async(dispatch_get_main_queue(), ^{
             initCore();
             showFloatingBall();
+            NSLog(@"[CHelperTweak] floating ball shown");
         });
     }];
 }
